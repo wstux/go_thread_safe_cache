@@ -31,7 +31,7 @@ test: ## Run all unit tests
 .PHONY: bench
 bench: ## Run all performance benchmarks
 	@echo "Running benchmarks..."
-	go test -bench=. -benchmem ./...
+	@go test -bench=. -benchmem ./... -run=^$$
 
 .PHONY: cover
 cover: ## Run tests and display statement coverage percentage in terminal
