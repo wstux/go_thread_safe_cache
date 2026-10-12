@@ -1,0 +1,43 @@
+name: Performance benchmarks
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# Ensure that only one benchmark workflow runs at a time to prevent CPU resource contention
+# which can severely distort performance measurements.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: Run and Compare Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Run benchmarks for all packages
+        run: |
+          # Execute the root Makefile target to collect performance data across the whole module.
+          make bench > benchmark_output.txt
+
+      - name: Analyze and Store Benchmark Results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: 'go'
+          output-file-path: benchmark_output.txt
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: ${{ github.event_name == 'push' }} # Update history charts only on push to master
+          comment-on-alert: true                        # Post a performance change report in the PR comments
+          fail-on-alert: false                          # Do not fail verification if performance drops
