@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ master ]
 
+permissions:
+  contents: write
+  deployments: write
+  pull-requests: write
+
 # Ensure that only one benchmark workflow runs at a time to prevent CPU resource contention
 # which can severely distort performance measurements.
 concurrency:
