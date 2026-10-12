@@ -14,9 +14,11 @@ fmt-check: ## Check Go code formatting without modifying files (fails if unforma
 	@echo "Checking code formatting..."
 	@ERRORS=$$(gofmt -l .); \
 	if [ -n "$$ERRORS" ]; then \
-		echo "The following files are not formatted properly according to gofmt:"; \
-		echo "$$ERRORS"; \
-		echo "Run 'gofmt -w .' to fix them."; \
+		echo "Error: The following Go files have formatting issues:"; \
+		echo "------------------------------------------------------"; \
+		gofmt -d .; \
+		echo "------------------------------------------------------"; \
+		echo "Fix them by running: gofmt -w ."; \
 		exit 1; \
 	fi
 
