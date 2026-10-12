@@ -1,9 +1,27 @@
 package lru
 
 import (
+	"hash/maphash"
 	"sync"
 	"testing"
 )
+
+var testSeed = maphash.MakeSeed()
+
+func standardHasher[K comparable](key K) uint32 {
+	switch k := any(key).(type) {
+	case string:
+		return uint32(maphash.String(testSeed, k))
+	case int:
+		return uint32(k)
+	case int32:
+		return uint32(k)
+	case int64:
+		return uint32(k)
+	default:
+		return 0
+	}
+}
 
 // cacheInterface defines the common behavior of both standard and safe caches.
 // This allows us to run the same set of tests against both implementations.
@@ -21,26 +39,26 @@ type testCacheInstance[K comparable, V any] struct {
 func getTestCaches[K comparable, V any](capacity int) []testCacheInstance[K, V] {
 	return []testCacheInstance[K, V]{
 		{name: "Standard Cache", cache: New[K, V](capacity)},
-		{name: "Safe Cache", cache: NewSafe[K, V](capacity)},
+		{name: "Safe Cache", cache: NewSafe[K, V](capacity * 2, 2, standardHasher[K])},
 	}
 }
 
 // TestCache_BasicOperations verifies standard Set and Get behavior for both cache types.
 func TestCache_BasicOperations(t *testing.T) {
-	for _, tc := range getTestCaches[string, int](2) {
+	for _, tc := range getTestCaches[int, int](2) {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.cache.Set("key1", 100)
-			tc.cache.Set("key2", 200)
+			tc.cache.Set(0, 100)
+			tc.cache.Set(1, 200)
 
-			if val, exists := tc.cache.Get("key1"); !exists || val != 100 {
-				t.Errorf("expected key1 to hold 100, got %v (exists: %v)", val, exists)
+			if val, exists := tc.cache.Get(0); !exists || val != 100 {
+				t.Errorf("expected key 0 to hold 100, got %v (exists: %v)", val, exists)
 			}
 
-			if val, exists := tc.cache.Get("key2"); !exists || val != 200 {
-				t.Errorf("expected key2 to hold 200, got %v (exists: %v)", val, exists)
+			if val, exists := tc.cache.Get(1); !exists || val != 200 {
+				t.Errorf("expected key 1 to hold 200, got %v (exists: %v)", val, exists)
 			}
 
-			if _, exists := tc.cache.Get("non_existent"); exists {
+			if _, exists := tc.cache.Get(999); exists {
 				t.Errorf("expected non_existent key to be missing")
 			}
 		})
@@ -49,24 +67,22 @@ func TestCache_BasicOperations(t *testing.T) {
 
 // TestCache_Eviction verifies that the least recently used item is evicted when capacity is exceeded.
 func TestCache_Eviction(t *testing.T) {
-	for _, tc := range getTestCaches[string, int](2) {
+	for _, tc := range getTestCaches[int, int](2) {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.cache.Set("key1", 1)
-			tc.cache.Set("key2", 2)
+			tc.cache.Set(0, 1)
+			tc.cache.Set(2, 2)
 
-			// This insert should evict "key1" since it is the oldest item at the tail.
-			tc.cache.Set("key3", 3)
+			// This insert should evict key "0" since it is the oldest item at the tail.
+			tc.cache.Set(4, 3)
 
-			if _, exists := tc.cache.Get("key1"); exists {
-				t.Errorf("expected key1 to be evicted from the cache")
+			if _, exists := tc.cache.Get(0); exists {
+				t.Errorf("expected key 0 to be evicted")
 			}
-
-			if _, exists := tc.cache.Get("key2"); !exists {
-				t.Errorf("expected key2 to still exist in the cache")
+			if _, exists := tc.cache.Get(2); !exists {
+				t.Errorf("expected key 2 to still exist")
 			}
-
-			if _, exists := tc.cache.Get("key3"); !exists {
-				t.Errorf("expected key3 to still exist in the cache")
+			if val, exists := tc.cache.Get(4); !exists || val != 3 {
+				t.Errorf("expected key 4 to exist, got %v", val)
 			}
 		})
 	}
@@ -74,35 +90,35 @@ func TestCache_Eviction(t *testing.T) {
 
 // TestCache_UpdateAndPromote verifies that accessing or updating an item marks it as recently used.
 func TestCache_UpdateAndPromote(t *testing.T) {
-	for _, tc := range getTestCaches[string, int](2) {
+	for _, tc := range getTestCaches[int, int](2) {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.cache.Set("key1", 1)
-			tc.cache.Set("key2", 2)
+	        tc.cache.Set(0, 10)
+	        tc.cache.Set(2, 20)
 
-			// Accessing "key1" moves it to the head, making "key2" the oldest item.
-			if _, exists := tc.cache.Get("key1"); !exists {
-				t.Fatalf("expected key1 to exist")
+			// Accessing key 0 moves it to the head, making key 2 the oldest item at the tail.
+			if _, exists := tc.cache.Get(0); !exists {
+				t.Fatalf("expected key 0 to exist")
 			}
 
-			// This insert should now evict "key2" instead of "key1".
-			tc.cache.Set("key3", 3)
+			// This insert should now evict key "2" instead of key "0".
+			tc.cache.Set(4, 3)
 
-			if _, exists := tc.cache.Get("key2"); exists {
-				t.Errorf("expected key2 to be evicted")
+			if _, exists := tc.cache.Get(2); exists {
+				t.Errorf("expected key 1 to be evicted")
 			}
 
-			if _, exists := tc.cache.Get("key1"); !exists {
-				t.Errorf("expected key1 to be preserved as recently used")
+			if _, exists := tc.cache.Get(0); !exists {
+				t.Errorf("expected key 0 to be preserved as recently used")
 			}
 
-			// Updating "key3" value and promoting it.
-			tc.cache.Set("key3", 30)
+			// Updating key "4" value and promoting it.
+			tc.cache.Set(4, 30)
 
-			// This insert should now evict "key1".
-			tc.cache.Set("key4", 4)
+			// This insert should now evict key "0".
+			tc.cache.Set(6, 4)
 
-			if _, exists := tc.cache.Get("key1"); exists {
-				t.Errorf("expected key1 to be evicted after key3 update")
+			if _, exists := tc.cache.Get(0); exists {
+				t.Errorf("expected key 0 to be evicted after key 4 update")
 			}
 		})
 	}
@@ -111,23 +127,21 @@ func TestCache_UpdateAndPromote(t *testing.T) {
 // TestCache_SingleElementEdgeCases exercises branches where head and tail modify
 // when there is only one element in the cache.
 func TestCache_SingleElementEdgeCases(t *testing.T) {
-	for _, tc := range getTestCaches[string, int](1) {
-		t.Run(tc.name, func(t *testing.T) {
-			// Set on empty cache (initializes head and tail to the same node)
-			tc.cache.Set("key1", 10)
+	cache := New[string, int](1)
 
-			// Update the exact same single element (exercises moveToHead where node.prev and node.next are nil)
-			tc.cache.Set("key1", 20)
-			if val, exists := tc.cache.Get("key1"); !exists || val != 20 {
-				t.Errorf("expected key1 to be updated to 20, got %v", val)
-			}
+	// Set on empty cache (initializes head and tail to the same node)
+	cache.Set("key1", 10)
 
-			// Evict the single element by adding a new one
-			tc.cache.Set("key2", 30)
-			if _, exists := tc.cache.Get("key1"); exists {
-				t.Errorf("expected key1 to be evicted from single-capacity cache")
-			}
-		})
+	// Update the exact same single element
+	cache.Set("key1", 20)
+	if val, exists := cache.Get("key1"); !exists || val != 20 {
+		t.Errorf("expected key1 to be updated to 20, got %v", val)
+	}
+
+	// Evict the single element by adding a new one
+	cache.Set("key2", 30)
+	if _, exists := cache.Get("key1"); exists {
+		t.Errorf("expected key1 to be evicted from single-capacity cache")
 	}
 }
 
@@ -138,12 +152,6 @@ func TestCache_DefaultCapacity(t *testing.T) {
 	cache := New[string, int](0)
 	if cache.capacity != 1 {
 		t.Errorf("expected capacity to fall back to 1, got %d", cache.capacity)
-	}
-
-	// Safe Cache validation
-	safeCache := NewSafe[string, int](0)
-	if safeCache.cache.capacity != 1 {
-		t.Errorf("expected safe cache underlying capacity to fall back to 1, got %d", safeCache.cache.capacity)
 	}
 }
 
@@ -186,10 +194,28 @@ func TestCache_RecycledNodeSequence(t *testing.T) {
 	}
 }
 
+// TestSafeCache_CapacityDistribution verifies the splitting math across shards.
+func TestSafeCache_CapacityDistribution(t *testing.T) {
+	sc1 := NewSafe[string, int](10, 3, standardHasher[string])
+	if sc1.shards[0].cache.capacity != 4 {
+		t.Errorf("expected shard 0 to have capacity 4, got %d", sc1.shards[0].cache.capacity)
+	}
+	if sc1.shards[1].cache.capacity != 3 {
+		t.Errorf("expected shard 1 to have capacity 3, got %d", sc1.shards[1].cache.capacity)
+	}
+
+	sc2 := NewSafe[string, int](2, 5, standardHasher[string])
+	for i := 0; i < 5; i++ {
+		if sc2.shards[i].cache.capacity != 1 {
+			t.Errorf("expected shard %d to have fallback capacity 1, got %d", i, sc2.shards[i].cache.capacity)
+		}
+	}
+}
+
 // TestSafeCache_Concurrency runs multiple goroutines performing concurrent
 // Set and Get operations specifically to test the SafeCache implementation.
 func TestSafeCache_Concurrency(t *testing.T) {
-	cache := NewSafe[int, int](50)
+	cache := NewSafe[int, int](128, 8, standardHasher[int])
 	var wg sync.WaitGroup
 	workers := 100
 	opsPerWorker := 100
@@ -238,7 +264,7 @@ func BenchmarkCache_Get(b *testing.B) {
 
 // BenchmarkSafeCache_Set measures the sequential performance of SafeCache.Set.
 func BenchmarkSafeCache_Set(b *testing.B) {
-	cache := NewSafe[int, int](1000)
+	cache := NewSafe[int, int](1000, 16, standardHasher[int])
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		cache.Set(i%2000, i)
@@ -247,7 +273,7 @@ func BenchmarkSafeCache_Set(b *testing.B) {
 
 // BenchmarkSafeCache_Get measures the sequential performance of SafeCache.Get.
 func BenchmarkSafeCache_Get(b *testing.B) {
-	cache := NewSafe[int, int](1000)
+	cache := NewSafe[int, int](1000, 16, standardHasher[int])
 	for i := 0; i < 1000; i++ {
 		cache.Set(i, i)
 	}
@@ -259,7 +285,7 @@ func BenchmarkSafeCache_Get(b *testing.B) {
 
 // BenchmarkSafeCache_SetParallel measures the performance of SafeCache.Set under concurrent load.
 func BenchmarkSafeCache_SetParallel(b *testing.B) {
-	cache := NewSafe[int, int](1000)
+	cache := NewSafe[int, int](1000, 16, standardHasher[int])
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		i := 0
@@ -272,7 +298,7 @@ func BenchmarkSafeCache_SetParallel(b *testing.B) {
 
 // BenchmarkSafeCache_GetParallel measures the performance of SafeCache.Get under concurrent load.
 func BenchmarkSafeCache_GetParallel(b *testing.B) {
-	cache := NewSafe[int, int](1000)
+	cache := NewSafe[int, int](1000, 16, standardHasher[int])
 	for i := 0; i < 1000; i++ {
 		cache.Set(i, i)
 	}
