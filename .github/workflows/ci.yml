@@ -1,0 +1,34 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-and-build:
+    name: Test, Check and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Run code formatting check
+        run: make fmt-check
+
+      - name: Run static analysis (go vet)
+        run: make vet
+
+      - name: Verify package compilation
+        run: make build
+
+      - name: Run all unit tests
+        run: make test
