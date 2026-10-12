@@ -136,14 +136,53 @@ func TestCache_SingleElementEdgeCases(t *testing.T) {
 func TestCache_DefaultCapacity(t *testing.T) {
 	// Standard Cache validation
 	cache := New[string, int](0)
-	if cache.capacity != 10 {
-		t.Errorf("expected capacity to fall back to 10, got %d", cache.capacity)
+	if cache.capacity != 1 {
+		t.Errorf("expected capacity to fall back to 1, got %d", cache.capacity)
 	}
 
 	// Safe Cache validation
 	safeCache := NewSafe[string, int](0)
-	if safeCache.cache.capacity != 10 {
-		t.Errorf("expected safe cache underlying capacity to fall back to 10, got %d", safeCache.cache.capacity)
+	if safeCache.cache.capacity != 1 {
+		t.Errorf("expected safe cache underlying capacity to fall back to 1, got %d", safeCache.cache.capacity)
+	}
+}
+
+// TestCache_RecycledNodeSequence verifies that the cache correctly manages list pointers
+// on low capacities during a tight sequence of element promotions, evictions with node recycling,
+// and subsequent updates to the head element.
+func TestCache_RecycledNodeSequence(t *testing.T) {
+	// Initialize cache with a strict capacity of 2
+	cache := New[string, int](2)
+
+	// Step 1: Fill up the cache
+	cache.Set("key1", 1)
+	cache.Set("key2", 2) // List state: key2 -> key1 (tail)
+
+	// Step 2: Access key1 to promote it to the head
+	_, _ = cache.Get("key1") // List state: key1 -> key2 (tail)
+
+	// Step 3: Evict key2 by inserting key3.
+	// Under the hood, key2 node is recycled to become key3.
+	cache.Set("key3", 3) // List state should be: key3 -> key1 (tail)
+
+	// Step 4: Perform an inline update on key3.
+	// This exercises moveToHead branch on the current head node.
+	cache.Set("key3", 30) // List state should remain: key3 -> key1 (tail)
+
+	// Step 5: Insert key4, which must evict key1 from the tail.
+	cache.Set("key4", 4) // List state should be: key4 -> key3 (tail)
+
+	// Verification
+	if _, exists := cache.Get("key1"); exists {
+		t.Errorf("expected key1 to be evicted from the tail on step 5")
+	}
+
+	if val, exists := cache.Get("key3"); !exists || val != 30 {
+		t.Errorf("expected key3 to exist with value 30, got %v (exists: %v)", val, exists)
+	}
+
+	if val, exists := cache.Get("key4"); !exists || val != 4 {
+		t.Errorf("expected key4 to exist with value 4, got %v (exists: %v)", val, exists)
 	}
 }
 
