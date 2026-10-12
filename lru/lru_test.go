@@ -116,3 +116,30 @@ func TestCache_DefaultCapacity(t *testing.T) {
 		t.Errorf("expected fallback cache to store and retrieve data correctly")
 	}
 }
+
+// BenchmarkCache_Set measures the performance of sequential Set operations.
+func BenchmarkCache_Set(b *testing.B) {
+	cache := New[int, int](1000)
+
+	// ResetTimer ignores the time spent during the setup above
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		cache.Set(i%2000, i) // Mix of updates and evictions
+	}
+}
+
+// BenchmarkCache_Get measures the performance of sequential Get operations.
+func BenchmarkCache_Get(b *testing.B) {
+	cache := New[int, int](1000)
+	// Pre-fill the cache
+	for i := 0; i < 1000; i++ {
+		cache.Set(i, i)
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = cache.Get(i % 1000) // Always hits existing elements
+	}
+}

@@ -28,6 +28,11 @@ vet: ## Run go vet static analysis tool
 test: ## Run all unit tests
 	go test -v ./...
 
+.PHONY: bench
+bench: ## Run all performance benchmarks
+	@echo "Running benchmarks..."
+	go test -bench=. -benchmem ./...
+
 .PHONY: cover
 cover: ## Run tests and display statement coverage percentage in terminal
 	go test -cover ./...
