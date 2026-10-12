@@ -9,7 +9,7 @@ type entry[K comparable, V any] struct {
 	value     V
 	prevList  int32 // Doubly linked list pointers using array indices
 	nextList  int32
-	isDefined bool  // Tracks whether the slot contains active data
+	isDefined bool // Tracks whether the slot contains active data
 }
 
 // Cache implements a non-thread-safe LRU (Least Recently Used) cache
@@ -142,7 +142,7 @@ func (c *Cache[K, V]) removeNode(idx int32) {
 
 // moveToHead promotes a node to the head position, marking it as the most recently used.
 func (c *Cache[K, V]) moveToHead(idx int32) {
-    if c.head == idx {
+	if c.head == idx {
 		return
 	}
 	c.removeNode(idx)

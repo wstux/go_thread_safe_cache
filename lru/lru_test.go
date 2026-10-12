@@ -39,7 +39,7 @@ type testCacheInstance[K comparable, V any] struct {
 func getTestCaches[K comparable, V any](capacity int) []testCacheInstance[K, V] {
 	return []testCacheInstance[K, V]{
 		{name: "Standard Cache", cache: New[K, V](capacity)},
-		{name: "Safe Cache", cache: NewSafe[K, V](capacity * 2, 2, standardHasher[K])},
+		{name: "Safe Cache", cache: NewSafe[K, V](capacity*2, 2, standardHasher[K])},
 	}
 }
 
@@ -92,8 +92,8 @@ func TestCache_Eviction(t *testing.T) {
 func TestCache_UpdateAndPromote(t *testing.T) {
 	for _, tc := range getTestCaches[int, int](2) {
 		t.Run(tc.name, func(t *testing.T) {
-	        tc.cache.Set(0, 10)
-	        tc.cache.Set(2, 20)
+			tc.cache.Set(0, 10)
+			tc.cache.Set(2, 20)
 
 			// Accessing key 0 moves it to the head, making key 2 the oldest item at the tail.
 			if _, exists := tc.cache.Get(0); !exists {
