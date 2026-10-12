@@ -26,7 +26,7 @@ vet: ## Run go vet static analysis tool
 
 .PHONY: test
 test: ## Run all unit tests
-	go test -v ./...
+	go test -v -race ./...
 
 .PHONY: bench
 bench: ## Run all performance benchmarks
