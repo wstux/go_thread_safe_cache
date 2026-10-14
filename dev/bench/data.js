@@ -26,145 +26,145 @@ window.BENCHMARK_DATA = {
         "tool": "go",
         "benches": [
           {
-            "name": "BenchmarkCache_Set",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 100.2,
             "unit": "ns/op\t      32 B/op\t       1 allocs/op",
             "extra": "12085729 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - ns/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 100.2,
             "unit": "ns/op",
             "extra": "12085729 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - B/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 32,
             "unit": "B/op",
             "extra": "12085729 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - allocs/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 1,
             "unit": "allocs/op",
             "extra": "12085729 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 11.02,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "100000000 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - ns/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 11.02,
             "unit": "ns/op",
             "extra": "100000000 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - B/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "100000000 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - allocs/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "100000000 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 109.7,
             "unit": "ns/op\t      32 B/op\t       1 allocs/op",
             "extra": "10960821 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - ns/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 109.7,
             "unit": "ns/op",
             "extra": "10960821 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - B/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 32,
             "unit": "B/op",
             "extra": "10960821 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - allocs/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 1,
             "unit": "allocs/op",
             "extra": "10960821 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 20.9,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "58383906 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - ns/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 20.9,
             "unit": "ns/op",
             "extra": "58383906 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - B/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "58383906 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - allocs/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "58383906 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 143.7,
             "unit": "ns/op\t      28 B/op\t       0 allocs/op",
             "extra": "8256404 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - ns/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 143.7,
             "unit": "ns/op",
             "extra": "8256404 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - B/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 28,
             "unit": "B/op",
             "extra": "8256404 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - allocs/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "8256404 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 43.83,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "27460159 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - ns/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 43.83,
             "unit": "ns/op",
             "extra": "27460159 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - B/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "27460159 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - allocs/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "27460159 times\n4 procs"
@@ -194,145 +194,145 @@ window.BENCHMARK_DATA = {
         "tool": "go",
         "benches": [
           {
-            "name": "BenchmarkCache_Set",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 51.46,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "22118391 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - ns/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 51.46,
             "unit": "ns/op",
             "extra": "22118391 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - B/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "22118391 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Set - allocs/op",
+            "name": "BenchmarkLRUCache_Set (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "22118391 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 9.128,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "132602853 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - ns/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 9.128,
             "unit": "ns/op",
             "extra": "132602853 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - B/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "132602853 times\n4 procs"
           },
           {
-            "name": "BenchmarkCache_Get - allocs/op",
+            "name": "BenchmarkLRUCache_Get (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "132602853 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 66.13,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "18370921 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - ns/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 66.13,
             "unit": "ns/op",
             "extra": "18370921 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - B/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "18370921 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Set - allocs/op",
+            "name": "BenchmarkLRUSafeCache_Set (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "18370921 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 30.7,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "38834911 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - ns/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 30.7,
             "unit": "ns/op",
             "extra": "38834911 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - B/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "38834911 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_Get - allocs/op",
+            "name": "BenchmarkLRUSafeCache_Get (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "38834911 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 47.88,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "25117828 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - ns/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 47.88,
             "unit": "ns/op",
             "extra": "25117828 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - B/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "25117828 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_SetParallel - allocs/op",
+            "name": "BenchmarkLRUSafeCache_SetParallel (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "25117828 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru)",
             "value": 26.12,
             "unit": "ns/op\t       0 B/op\t       0 allocs/op",
             "extra": "44533515 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - ns/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - ns/op",
             "value": 26.12,
             "unit": "ns/op",
             "extra": "44533515 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - B/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - B/op",
             "value": 0,
             "unit": "B/op",
             "extra": "44533515 times\n4 procs"
           },
           {
-            "name": "BenchmarkSafeCache_GetParallel - allocs/op",
+            "name": "BenchmarkLRUSafeCache_GetParallel (github.com/wstux/go_thread_safe_cache/lru) - allocs/op",
             "value": 0,
             "unit": "allocs/op",
             "extra": "44533515 times\n4 procs"
