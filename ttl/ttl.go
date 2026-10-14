@@ -1,19 +1,15 @@
 package ttl
 
 import (
+	"github.com/wstux/go_thread_safe_cache/internal/list"
 	"time"
 )
-
-// Index constant to represent a null pointer in our array-based structures.
-const nullIdx int32 = -1
 
 // entry represents a flat, self-contained slot in our pre-allocated array.
 type entry[K comparable, V any] struct {
 	key       K
 	value     V
 	expiresAt int64 // Expiration timestamp in UnixNano format (0 strictly means slot is empty)
-	prevList  int32 // Doubly linked list pointers using array indices (LRU order)
-	nextList  int32
 }
 
 // isDefined checks whether the slot currently holds active user data.
@@ -29,12 +25,12 @@ func (e *entry[K, V]) isExpired(now int64) bool {
 // Cache implements a highly optimized, single-array TLRU cache with a global TTL setting.
 type Cache[K comparable, V any] struct {
 	slots      []entry[K, V]
-	items      map[K]int32   // Maps user keys to flat indices in the slots array
+	links      []list.Link
+	items      map[K]int32 // Maps user keys to flat indices in the slots array
 	capacity   int32
 	size       int32
-	head       int32
-	tail       int32
-	freeHead   int32         // Head index of the pre-allocated free slots chain
+	freeHead   int32 // Head index of the pre-allocated free slots chain
+	ttlList    list.List
 	defaultTTL time.Duration // Global time-to-live duration enforced on all elements
 }
 
@@ -47,27 +43,33 @@ func New[K comparable, V any](capacity int, defaultTTL time.Duration) *Cache[K, 
 		defaultTTL = time.Minute // Safe and sane fallback if no timeout is specified
 	}
 
-	size := capacity
-	slots := make([]entry[K, V], size)
+	slots := make([]entry[K, V], capacity)
+	links := make([]list.Link, capacity)
 
 	// Pre-link all slots into a single-linked Free List for rapid O(1) acquisition
-	for i := 0; i < size; i++ {
-		slots[i] = entry[K, V]{
-			prevList:  nullIdx,
-			nextList:  int32(i + 1), // Points to the next free slot
-			expiresAt: 0,            // 0 strictly marks the slot as undefined/free
+	for i := 0; i < capacity; i++ {
+		links[i] = list.Link{
+			Prev: list.NullIdx,
+			Next: int32(i + 1), // Points to the next free slot
 		}
 	}
-	slots[size-1].nextList = nullIdx // Terminate the free list chain
+	links[capacity-1].Next = list.NullIdx // Terminate the free list chain
+	//for i := 0; i < size; i++ {
+	//	slots[i] = entry[K, V]{
+	//		prevList:  nullIdx,
+	//		nextList:  int32(i + 1),
+	//		expiresAt: 0,            // 0 strictly marks the slot as undefined/free
+	//	}
+	//}
 
 	return &Cache[K, V]{
 		slots:      slots,
-		items:      make(map[K]int32, size), // Pre-size the map to prevent runtime resizing
+		links:      links,
+		items:      make(map[K]int32, capacity), // Pre-size the map to prevent runtime resizing
 		capacity:   int32(capacity),
 		size:       0,
-		head:       nullIdx,
-		tail:       nullIdx,
 		freeHead:   0,
+		ttlList:    list.New(),
 		defaultTTL: defaultTTL,
 	}
 }
@@ -81,11 +83,12 @@ func (c *Cache[K, V]) Get(key K) (V, bool) {
 
 	// Lazy eviction check using unified UnixNano timestamp
 	if c.slots[idx].isExpired(time.Now().UnixNano()) {
+		c.ttlList.RemoveNode(idx, c.links)
 		c.evict(idx)
 		return *new(V), false
 	}
 
-	c.moveToHead(idx)
+	c.ttlList.MoveToHead(idx, c.links)
 	return c.slots[idx].value, true
 }
 
@@ -98,71 +101,32 @@ func (c *Cache[K, V]) Set(key K, value V) {
 	if idx, exists := c.items[key]; exists {
 		c.slots[idx].value = value
 		c.slots[idx].expiresAt = now + int64(c.defaultTTL)
-		c.moveToHead(idx)
+		c.ttlList.MoveToHead(idx, c.links)
 		return
 	}
 
 	// 2. Capacity management. If full, evict the oldest item from the tail
 	var targetIdx int32
 	if c.size >= c.capacity {
-		targetIdx = c.tail
-		c.removeNode(targetIdx)
+		targetIdx = c.ttlList.Tail
+		c.ttlList.RemoveNode(targetIdx, c.links)
 		delete(c.items, c.slots[targetIdx].key)
 		c.slots[targetIdx].expiresAt = 0 // Return slot to raw empty state before resizing
-		c.size--
 	} else {
 		// Fast O(1) retrieval from the pre-allocated Free List
 		targetIdx = c.freeHead
-		c.freeHead = c.slots[targetIdx].nextList
+		c.freeHead = c.links[targetIdx].Next
+		c.size++
 	}
 
 	// 3. Write data directly into the pre-allocated flat slot
 	c.slots[targetIdx].key = key
 	c.slots[targetIdx].value = value
 	c.slots[targetIdx].expiresAt = now + int64(c.defaultTTL) // Apply consistent global timeout
-	c.size++
 
 	// Track index inside the map indexer and push to head
 	c.items[key] = targetIdx
-	c.addToHead(targetIdx)
-}
-
-func (c *Cache[K, V]) addToHead(idx int32) {
-	c.slots[idx].nextList = c.head
-	c.slots[idx].prevList = nullIdx
-
-	if c.head != nullIdx {
-		c.slots[c.head].prevList = idx
-	}
-	c.head = idx
-	if c.tail == nullIdx {
-		c.tail = idx
-	}
-}
-
-func (c *Cache[K, V]) removeNode(idx int32) {
-	prev := c.slots[idx].prevList
-	next := c.slots[idx].nextList
-
-	if prev != nullIdx {
-		c.slots[prev].nextList = next
-	} else {
-		c.head = next
-	}
-
-	if next != nullIdx {
-		c.slots[next].prevList = prev
-	} else {
-		c.tail = prev
-	}
-}
-
-func (c *Cache[K, V]) moveToHead(idx int32) {
-	if c.head == idx {
-		return
-	}
-	c.removeNode(idx)
-	c.addToHead(idx)
+	c.ttlList.AddToHead(targetIdx, c.links)
 }
 
 func (c *Cache[K, V]) evict(idx int32) {
@@ -175,6 +139,6 @@ func (c *Cache[K, V]) evict(idx int32) {
 	c.size--
 
 	// Return the recycled index back to the front of the Free List chain
-	c.slots[idx].nextList = c.freeHead
+	c.links[idx].Next = c.freeHead
 	c.freeHead = idx
 }
